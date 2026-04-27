@@ -112,14 +112,14 @@ FPS = cap.stream.get(cv2.CAP_PROP_FPS)
 print(f"SUCCESS! Camera Live Pipeline: {WIDTH}x{HEIGHT} @ {FPS} FPS")
 
 # ================= MEDIAPIPE =================
-mpHands = mp.solutions.hands
+import mediapipe.python.solutions.hands as mpHands
 hands = mpHands.Hands(
     max_num_hands=1,
     model_complexity=0,
     min_detection_confidence=0.5,
     min_tracking_confidence=0.7
 )
-mpDraw = mp.solutions.drawing_utils
+import mediapipe.python.solutions.drawing_utils as mpDraw
 
 canvas = np.zeros((HEIGHT, WIDTH, 3), np.uint8)
 

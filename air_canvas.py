@@ -1,3 +1,7 @@
+import sys
+# Prevent MediaPipe from triggering global TensorFlow conflicts
+sys.modules['tensorflow'] = None
+
 import cv2
 import mediapipe as mp
 import numpy as np

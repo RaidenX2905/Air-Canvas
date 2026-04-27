@@ -71,6 +71,23 @@ cd Air-Canvas
 2. Install the strict deterministic dependencies to ensure smooth API execution:
 ```bash
 pip install -r requirements.txt
+
+## 🛠️ Recommended: Virtual Environment Setup
+To avoid dependency conflicts with other packages like TensorFlow, it is highly recommended to run this project in a Virtual Environment:
+
+```powershell
+# 1. Create the environment
+python -m venv venv
+
+# 2. Activate it
+.\venv\Scripts\activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Run the script
+python air_canvas.py
+```
 ```
 
 3. Initialize the matrix:

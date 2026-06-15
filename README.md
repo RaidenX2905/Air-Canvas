@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/Status-Ultra%20Optimized-success.svg" alt="Status">
 </div>
 
-<h1 align="center">🎨 Air Canvas PRO</h1>
+<h1 align="center"> Air Canvas </h1>
 
 <p align="center">
   <b>A hyper-optimized, zero-latency Computer Vision application that lets you draw freely in the air using native hand gestures.</b>
@@ -15,7 +15,7 @@
 
 ## ⚡ Overview
 
-Air Canvas PRO revolutionizes simple webcam tracking by utilizing a highly sophisticated **hybrid CPU/GPU architecture**. Running on Google MediaPipe and OpenCV, the application fundamentally eliminates IO boundaries and artificial frame drops. 
+Air Canvas revolutionizes simple webcam tracking by utilizing a highly sophisticated **hybrid CPU/GPU architecture**. Running on Google MediaPipe and OpenCV, the application fundamentally eliminates IO boundaries and artificial frame drops. 
 
 We completely decoupled traditional synchronous bottlenecks by spinning up multithreaded daemon processes and replacing legacy matrix operations with lightning-fast pure math. The result? A perfectly fluid, anti-aliased digital ink experience operating at maximum hardware capable FPS.
 

@@ -8,3 +8,5 @@ venv/
 env/
 .env
 .gemini/
+*.task
+air_canvas_export_*.png

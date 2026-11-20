@@ -1,4 +1,4 @@
-# Air Canvas PRO
+# Air Canvas
 
 A high-performance, low-latency computer vision application that turns your webcam into a gesture-controlled digital canvas using Google MediaPipe Tasks, OpenCV, and NumPy.
 

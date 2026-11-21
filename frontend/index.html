@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://cdn.jsdelivr.net https://storage.googleapis.com;">
+  <meta name="referrer" content="no-referrer">
+  <title>Air Canvas Web</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Bar Controls -->
+    <header class="top-nav">
+      <div class="brand">
+        <span class="logo-mark"></span>
+        <span class="brand-title">AIR CANVAS</span>
+        <span class="hw-chip active" id="hwChipActive">
+          <span class="badge" id="hwBadge">PROBING...</span>
+          <span id="hwActiveVal"></span>
+        </span>
+      </div>
+
+      <div class="header-metrics">
+        <span class="metric-item">FPS: <b id="fpsCounter">0</b></span>
+        <span class="metric-item">MODE: <b id="modeIndicator" class="mode-tag idle">IDLE</b></span>
+        <span class="metric-item">OBJECTS: <b id="strokeCount">0</b></span>
+      </div>
+
+      <div class="action-tools">
+        <button id="btnUndo" class="tool-btn" title="Undo">Undo</button>
+        <button id="btnRedo" class="tool-btn" title="Redo">Redo</button>
+        <button id="btnClear" class="tool-btn danger" title="Clear Canvas">Clear</button>
+        <button id="btnFullscreen" class="tool-btn" title="Toggle Fullscreen">Fullscreen</button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="viewport" id="viewport">
+      <!-- Hidden Video Element for Camera Stream -->
+      <video id="webcam" autoplay playsinline muted></video>
+
+      <div class="canvas-wrapper" id="canvasWrapper">
+        <!-- Layer 1: Background Webcam Canvas -->
+        <canvas id="cameraCanvas"></canvas>
+
+        <!-- Layer 2: Vector Drawing Ink Canvas -->
+        <canvas id="paintCanvas"></canvas>
+
+        <!-- Layer 3: Cyberpunk Hand Skeleton & Reticle HUD Layer -->
+        <canvas id="overlayCanvas"></canvas>
+      </div>
+
+      <!-- Loading / Camera Initialization Overlay -->
+      <div id="loaderOverlay" class="loader-overlay">
+        <div class="spinner"></div>
+        <div id="loaderText">Initializing In-Browser Hand Tracker...</div>
+        <div class="loader-sub">Loading MediaPipe WebAssembly vision model locally</div>
+      </div>
+    </main>
+
+    <!-- Bottom Interactive Control Dock -->
+    <footer class="control-dock">
+      <div class="dock-section">
+        <label for="cameraSelect">Camera</label>
+        <select id="cameraSelect" class="dock-select">
+          <option value="">Detecting...</option>
+        </select>
+      </div>
+
+      <div class="dock-divider"></div>
+
+      <!-- Compute Device Selection (Auto by default with manual override) -->
+      <div class="dock-section">
+        <label for="deviceSelect">Processor</label>
+        <select id="deviceSelect" class="dock-select">
+          <option value="AUTO" selected>Auto (Optimal)</option>
+          <option value="dGPU">dGPU (High Perf)</option>
+          <option value="iGPU">iGPU (Hardware Accel)</option>
+          <option value="CPU">CPU (WASM Fallback)</option>
+        </select>
+      </div>
+
+      <div class="dock-divider"></div>
+
+      <!-- Color Palette -->
+      <div class="dock-section">
+        <label>Palette</label>
+        <div class="palette-swatches" id="paletteContainer">
+          <!-- Dynamically populated from JS -->
+        </div>
+        <input type="color" id="customColorPicker" value="#ff0000" title="Custom Color">
+      </div>
+
+      <div class="dock-divider"></div>
+
+      <!-- Brush Size Slider -->
+      <div class="dock-section">
+        <label>Brush: <span id="brushSizeVal">6px</span></label>
+        <input type="range" id="brushSlider" min="1" max="24" value="6" class="dock-slider">
+      </div>
+
+      <div class="dock-divider"></div>
+
+      <!-- Eraser Size Slider -->
+      <div class="dock-section">
+        <label>Eraser: <span id="eraserSizeVal">36px</span></label>
+        <input type="range" id="eraserSlider" min="15" max="80" value="36" class="dock-slider">
+      </div>
+
+      <div class="dock-divider"></div>
+
+      <!-- Gestures Quick Guide -->
+      <div class="dock-section hints">
+        <span><b>Index:</b> Draw</span>
+        <span><b>Pinch:</b> Move</span>
+        <span><b>Fist:</b> Erase</span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="canvas_engine.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

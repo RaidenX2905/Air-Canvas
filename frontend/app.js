@@ -214,8 +214,53 @@ import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@m
     }
   }
 
-  // Client-side sanitizer for raw WebGL/CPU fallback strings
-  function cleanClientHw(str, mode) {
+  // Smart Auto Hardware Transition Controller
+  let autoHardwareTier = 0; // 0 = dGPU, 1 = iGPU, 2 = CPU
+  let isHardwareTransitioning = false;
+
+  async function stepHardwareDown() {
+    if (deviceSelect && deviceSelect.value !== 'AUTO') return;
+    if (isHardwareTransitioning) return;
+    if (autoHardwareTier >= 2) return; // Already on CPU
+
+    isHardwareTransitioning = true;
+    autoHardwareTier++;
+    const nextMode = autoHardwareTier === 1 ? 'iGPU' : 'CPU';
+    console.log(`[Auto Engine] Stepping hardware down to: ${nextMode}`);
+
+    try {
+      await setupHandLandmarker(nextMode);
+      currentFactorIndex = 1; // Reset scaling factor to healthy tier
+      consecutiveDropFrames = 0;
+      consecutiveGoodFrames = 0;
+    } catch (e) {
+      console.warn(`[Auto Engine] Transition to ${nextMode} failed:`, e);
+    } finally {
+      isHardwareTransitioning = false;
+    }
+  }
+
+  async function stepHardwareUp() {
+    if (deviceSelect && deviceSelect.value !== 'AUTO') return;
+    if (isHardwareTransitioning) return;
+    if (autoHardwareTier <= 0) return; // Already at top (dGPU)
+
+    isHardwareTransitioning = true;
+    autoHardwareTier--;
+    const nextMode = autoHardwareTier === 0 ? 'dGPU' : 'iGPU';
+    console.log(`[Auto Engine] Stepping hardware up to: ${nextMode}`);
+
+    try {
+      await setupHandLandmarker(nextMode);
+      currentFactorIndex = 0;
+      consecutiveDropFrames = 0;
+      consecutiveGoodFrames = 0;
+    } catch (e) {
+      console.warn(`[Auto Engine] Transition to ${nextMode} failed:`, e);
+    } finally {
+      isHardwareTransitioning = false;
+    }
+  }
     if (!str) return '';
     let s = str.replace(/ANGLE \((.*)\)/, '$1').replace(/Direct3D.*vs_\d_\d/, '').trim();
     s = s.replace(/Corporation/gi, '').replace(/Company/gi, '');
@@ -630,22 +675,35 @@ import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@m
 
       const inferenceDuration = performance.now() - tInferenceStart;
 
-      // Ultra-Fast Recovery Dynamic Load Controller:
-      // Drop prompt: 2 consecutive frame drops (< 24 FPS or > 26ms inference) steps down.
-      // Fast recovery: only 6 consecutive healthy frames (<= 20ms inference & >= 25 FPS) immediately recovers resolution.
+      // Ultra-Fast Recovery Dynamic Load & Hardware Transition Controller:
+      // 1. Resolution Scaling:
+      // Drop prompt: 2 consecutive frame drops (< 24 FPS or > 26ms inference) steps down resolution.
+      // Fast recovery: 6 consecutive healthy frames (<= 20ms inference & >= 25 FPS) recovers resolution.
       if (inferenceDuration > 26.0 || currentAvgFps < 24) {
         consecutiveDropFrames++;
         consecutiveGoodFrames = 0;
-        if (consecutiveDropFrames >= 2 && currentFactorIndex < ADAPTIVE_FACTORS.length - 1) {
-          currentFactorIndex++;
-          consecutiveDropFrames = 0;
+        if (consecutiveDropFrames >= 2) {
+          if (currentFactorIndex < ADAPTIVE_FACTORS.length - 1) {
+            currentFactorIndex++;
+            consecutiveDropFrames = 0;
+          } else {
+            // Already at lowest resolution tier and still struggling -> step hardware backend down (dGPU -> iGPU -> CPU)
+            stepHardwareDown();
+            consecutiveDropFrames = 0;
+          }
         }
       } else if (inferenceDuration <= 20.0 && currentAvgFps >= 25) {
         consecutiveGoodFrames++;
         consecutiveDropFrames = 0;
-        if (consecutiveGoodFrames >= 6 && currentFactorIndex > 0) {
-          currentFactorIndex--;
-          consecutiveGoodFrames = 0;
+        if (consecutiveGoodFrames >= 6) {
+          if (currentFactorIndex > 0) {
+            currentFactorIndex--;
+            consecutiveGoodFrames = 0;
+          } else if (consecutiveGoodFrames >= 120) {
+            // If at full resolution and rock solid for 120 frames -> safely check if we can upgrade hardware backend (CPU -> iGPU -> dGPU)
+            stepHardwareUp();
+            consecutiveGoodFrames = 0;
+          }
         }
       }
     } else {

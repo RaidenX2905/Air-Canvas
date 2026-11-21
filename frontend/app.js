@@ -335,18 +335,7 @@ import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@m
   }
 
   // Update Active Hardware HUD Display
-  function updateHardwareDisplay(activeMode, gpuName, cpuName) {
-    const hostHw = window.__AIR_CANVAS_HOST_HW__ || {};
-
-    let details = '';
-    if (activeMode === 'dGPU') {
-      details = hostHw.dgpu || cleanClientHw(gpuName, 'dGPU');
-    } else if (activeMode === 'CPU') {
-      details = hostHw.cpu || cleanClientHw(cpuName, 'CPU');
-    } else if (activeMode === 'iGPU') {
-      details = hostHw.igpu || cleanClientHw(gpuName, 'iGPU');
-    }
-
+  function updateHardwareDisplay(activeMode) {
     if (hwBadge) {
       const modeLabel = (deviceSelect && deviceSelect.value === 'AUTO') ? `AUTO • ${activeMode}` : `${activeMode} • ACTIVE`;
       hwBadge.textContent = modeLabel;
@@ -363,8 +352,8 @@ import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@m
     }
 
     if (hwActiveVal) {
-      hwActiveVal.textContent = details ? `(${details})` : '';
-      hwActiveVal.title = `${activeMode}: ${details}`;
+      hwActiveVal.textContent = '';
+      hwActiveVal.title = `${activeMode}`;
     }
   }
 
@@ -407,14 +396,14 @@ import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@m
           // If machine has no discrete chip detected by host or WebGL, classify as iGPU
           activeDelegate = 'GPU';
           autoHardwareTier = 1;
-          updateHardwareDisplay('iGPU', gpuName, cpuName);
+          updateHardwareDisplay('iGPU');
           return;
         }
 
         activeDelegate = 'GPU';
         autoHardwareTier = 0;
         currentFactorIndex = 0;
-        updateHardwareDisplay('dGPU', gpuName, cpuName);
+        updateHardwareDisplay('dGPU');
         if (deviceSelect && targetChoice !== 'AUTO') deviceSelect.value = 'dGPU';
         return;
       } catch (dErr) {
@@ -442,7 +431,7 @@ import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@m
         activeDelegate = 'GPU';
         autoHardwareTier = 1;
         currentFactorIndex = 1;
-        updateHardwareDisplay('iGPU', gpuName, cpuName);
+        updateHardwareDisplay('iGPU');
         if (deviceSelect && targetChoice !== 'AUTO') deviceSelect.value = 'iGPU';
         return;
       } catch (igpuErr) {
@@ -470,7 +459,7 @@ import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@m
         autoHardwareTier = 2;
         const numCores = navigator.hardwareConcurrency || 2;
         currentFactorIndex = numCores <= 4 ? 3 : 2;
-        updateHardwareDisplay('CPU', gpuName, cpuName);
+        updateHardwareDisplay('CPU');
         if (deviceSelect && targetChoice !== 'AUTO') deviceSelect.value = 'CPU';
         return;
       } catch (cpuErr) {

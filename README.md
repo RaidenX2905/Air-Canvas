@@ -4,6 +4,8 @@ A high-performance, real-time gesture-controlled drawing canvas powered by Media
 
 **Live Demo**: [https://aircanvasbyjsh.streamlit.app/](https://aircanvasbyjsh.streamlit.app/)
 
+> **Developer Recommendation**: For the best, smoothest, and lowest-latency drawing experience, run on a PC in **dGPU mode** (Discrete GPU).
+
 ---
 
 ## What's New in v1.4

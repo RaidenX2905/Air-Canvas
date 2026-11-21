@@ -6,6 +6,14 @@ A high-performance, real-time gesture-controlled drawing canvas powered by Media
 
 ---
 
+## What's New in v1.4
+
+- **Liquid Glass Interface**: Apple-inspired translucent glassmorphism aesthetic with background saturation blur, floating pill controls, specular borders, and refined dark theme.
+- **Bi-Directional Auto Hardware Stepping**: Dynamic hardware orchestration prioritizing discrete GPU (`dGPU`) $\to$ integrated GPU (`iGPU`) $\to$ CPU WASM fallback with real-time bidirectional recovery and automatic resolution downscaling/upscaling based on frame pacing.
+- **Dynamic Fullscreen Mode**: Seamless cross-context fullscreen toggle that automatically syncs UI text and states across native and embedded iframe viewports.
+
+---
+
 ## Features
 
 - **Dual-Interface Runtime**:
@@ -28,7 +36,7 @@ A high-performance, real-time gesture-controlled drawing canvas powered by Media
   - 6-swatch primary palette + native RGB color picker.
   - Brush thickness slider (1–24 px).
   - Dedicated eraser slider (15–80 px).
-  - Fullscreen toggle, Undo, Redo, and Clear.
+  - Dynamic fullscreen toggle, Undo, Redo, and Clear.
   - Dynamic multi-camera selector.
 
 ---

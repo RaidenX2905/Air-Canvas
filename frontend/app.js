@@ -124,12 +124,70 @@ import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@m
   btnRedo.addEventListener('click', () => { engine.redo(); updateMetrics(); });
   btnClear.addEventListener('click', () => { engine.clear(); updateMetrics(); });
 
-  btnFullscreen.addEventListener('click', () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else {
-      document.exitFullscreen();
+  function isFullscreenActive() {
+    try {
+      if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+        return true;
+      }
+      if (window.parent && window.parent !== window) {
+        const pd = window.parent.document;
+        if (pd && (pd.fullscreenElement || pd.webkitFullscreenElement || pd.mozFullScreenElement || pd.msFullscreenElement)) {
+          return true;
+        }
+      }
+    } catch (_) {}
+    return false;
+  }
+
+  function updateFullscreenUI() {
+    const isFull = isFullscreenActive();
+    btnFullscreen.textContent = isFull ? 'Exit Fullscreen' : 'Fullscreen';
+    btnFullscreen.title = isFull ? 'Exit Fullscreen' : 'Toggle Fullscreen';
+    btnFullscreen.classList.toggle('active', isFull);
+  }
+
+  btnFullscreen.addEventListener('click', async () => {
+    try {
+      if (!isFullscreenActive()) {
+        const target = document.documentElement;
+        if (target.requestFullscreen) {
+          await target.requestFullscreen();
+        } else if (target.webkitRequestFullscreen) {
+          await target.webkitRequestFullscreen();
+        } else if (target.msRequestFullscreen) {
+          await target.msRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          await document.msExitFullscreen();
+        } else if (window.parent && window.parent.document && window.parent.document.exitFullscreen) {
+          await window.parent.document.exitFullscreen();
+        }
+      }
+    } catch (err) {
+      console.warn('Fullscreen toggle failed:', err);
     }
+    updateFullscreenUI();
+  });
+
+  const fsEvents = ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'];
+  fsEvents.forEach(evt => {
+    document.addEventListener(evt, () => {
+      updateFullscreenUI();
+      resizeCanvases();
+    });
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.document.addEventListener(evt, () => {
+          updateFullscreenUI();
+          resizeCanvases();
+        });
+      }
+    } catch (_) {}
   });
 
   function updateMetrics() {
@@ -261,6 +319,9 @@ import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@m
       isHardwareTransitioning = false;
     }
   }
+
+  // Client-side sanitizer for raw WebGL/CPU fallback strings
+  function cleanClientHw(str, mode) {
     if (!str) return '';
     let s = str.replace(/ANGLE \((.*)\)/, '$1').replace(/Direct3D.*vs_\d_\d/, '').trim();
     s = s.replace(/Corporation/gi, '').replace(/Company/gi, '');
@@ -287,16 +348,17 @@ import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@m
     }
 
     if (hwBadge) {
-      hwBadge.textContent = `${activeMode} • ACTIVE`;
+      const modeLabel = (deviceSelect && deviceSelect.value === 'AUTO') ? `AUTO • ${activeMode}` : `${activeMode} • ACTIVE`;
+      hwBadge.textContent = modeLabel;
       if (activeMode === 'dGPU') {
-        hwBadge.style.color = '#00e5ff';
-        hwBadge.style.borderColor = 'rgba(0, 229, 255, 0.4)';
+        hwBadge.style.color = '#38bdf8';
+        hwBadge.style.borderColor = 'rgba(56, 189, 248, 0.4)';
       } else if (activeMode === 'CPU') {
-        hwBadge.style.color = '#10b981';
-        hwBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        hwBadge.style.color = '#34d399';
+        hwBadge.style.borderColor = 'rgba(52, 211, 153, 0.4)';
       } else {
-        hwBadge.style.color = '#f59e0b';
-        hwBadge.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+        hwBadge.style.color = '#fbbf24';
+        hwBadge.style.borderColor = 'rgba(251, 191, 36, 0.4)';
       }
     }
 
@@ -321,11 +383,13 @@ import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@m
     const cpuName = `CPU (${cores} SIMD/WASM)`;
     const gpuName = gpuInfo.renderer ? gpuInfo.renderer.replace(/ANGLE \((.*)\)/, '$1').replace(/Direct3D.*vs_\d_\d/, '').trim() : 'WebGL Accelerator';
 
-    // 1. dGPU attempt: If user requested dGPU, OR if AUTO and machine has dGPU
-    const shouldTryDgpu = (targetChoice === 'dGPU') || (targetChoice === 'AUTO' && gpuInfo.isDgpu);
+    // 1. dGPU attempt: If user requested dGPU, OR if AUTO
+    // In AUTO mode on any machine with GPU capabilities, ALWAYS attempt dGPU first.
+    // If discrete chip is not present or unsupported by browser WebGL layer, it safely falls to iGPU then CPU.
+    const shouldTryDgpu = (targetChoice === 'dGPU') || (targetChoice === 'AUTO');
     if (shouldTryDgpu) {
       try {
-        console.log('Attempting dGPU initialization...');
+        console.log('[Hardware Hierarchy] 1/3: Probing dGPU...');
         handLandmarker = await HandLandmarker.createFromOptions(visionResolver, {
           baseOptions: {
             modelAssetPath: modelUrl,
@@ -337,22 +401,33 @@ import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@m
           minHandPresenceConfidence: 0.35,
           minTrackingConfidence: 0.35
         });
+
+        // Check if WebGL context actually resolved to a discrete chip or generic
+        if (targetChoice === 'AUTO' && !gpuInfo.isDgpu) {
+          // If machine has no discrete chip detected by host or WebGL, classify as iGPU
+          activeDelegate = 'GPU';
+          autoHardwareTier = 1;
+          updateHardwareDisplay('iGPU', gpuName, cpuName);
+          return;
+        }
+
         activeDelegate = 'GPU';
-        currentFactorIndex = 0; // High performance starting scale
+        autoHardwareTier = 0;
+        currentFactorIndex = 0;
         updateHardwareDisplay('dGPU', gpuName, cpuName);
         if (deviceSelect && targetChoice !== 'AUTO') deviceSelect.value = 'dGPU';
         return;
       } catch (dErr) {
-        console.warn('dGPU init failed, falling back to iGPU:', dErr);
-        if (targetChoice === 'dGPU') throw dErr; // If user explicitly selected dGPU, notify them
+        console.warn('[Hardware Hierarchy] dGPU failed, stepping to iGPU:', dErr);
+        if (targetChoice === 'dGPU') throw dErr;
       }
     }
 
-    // 2. iGPU attempt: If user requested iGPU, OR AUTO on systems without dGPU (or after dGPU fallback)
+    // 2. iGPU attempt: If user requested iGPU, OR AUTO fallback
     const shouldTryIgpu = (targetChoice === 'iGPU') || (targetChoice === 'AUTO');
     if (shouldTryIgpu) {
       try {
-        console.log('Attempting iGPU hardware acceleration initialization...');
+        console.log('[Hardware Hierarchy] 2/3: Probing iGPU hardware acceleration...');
         handLandmarker = await HandLandmarker.createFromOptions(visionResolver, {
           baseOptions: {
             modelAssetPath: modelUrl,
@@ -365,20 +440,21 @@ import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@m
           minTrackingConfidence: 0.35
         });
         activeDelegate = 'GPU';
-        currentFactorIndex = 1; // Start at 75% scale for smooth instant response on integrated chips
+        autoHardwareTier = 1;
+        currentFactorIndex = 1;
         updateHardwareDisplay('iGPU', gpuName, cpuName);
         if (deviceSelect && targetChoice !== 'AUTO') deviceSelect.value = 'iGPU';
         return;
       } catch (igpuErr) {
-        console.warn('iGPU init failed, falling back to CPU:', igpuErr);
+        console.warn('[Hardware Hierarchy] iGPU failed, stepping to CPU:', igpuErr);
         if (targetChoice === 'iGPU') throw igpuErr;
       }
     }
 
-    // 3. CPU fallback: If user requested CPU, OR AUTO fallback on systems without any working GPU
+    // 3. CPU fallback: If user requested CPU, OR AUTO fallback
     if (targetChoice === 'CPU' || targetChoice === 'AUTO') {
       try {
-        console.log('Attempting CPU WASM fallback initialization...');
+        console.log('[Hardware Hierarchy] 3/3: Initializing CPU (WASM SIMD)...');
         handLandmarker = await HandLandmarker.createFromOptions(visionResolver, {
           baseOptions: {
             modelAssetPath: modelUrl,
@@ -391,14 +467,14 @@ import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@m
           minTrackingConfidence: 0.35
         });
         activeDelegate = 'CPU';
-        // Auto-select starting tier for CPU based on core count
+        autoHardwareTier = 2;
         const numCores = navigator.hardwareConcurrency || 2;
-        currentFactorIndex = numCores <= 4 ? 3 : 2; // 35% scale on dual/quad-cores, 50% on higher
+        currentFactorIndex = numCores <= 4 ? 3 : 2;
         updateHardwareDisplay('CPU', gpuName, cpuName);
         if (deviceSelect && targetChoice !== 'AUTO') deviceSelect.value = 'CPU';
         return;
       } catch (cpuErr) {
-        console.error('All hardware initializations failed:', cpuErr);
+        console.error('All hardware backends failed:', cpuErr);
         throw cpuErr;
       }
     }

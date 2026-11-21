@@ -1,67 +1,49 @@
+<div align="center">
+
 # Air Canvas
 
-A high-performance, real-time gesture-controlled drawing canvas powered by MediaPipe Hand Landmarker, WebAssembly, and OpenCV.
+[![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=flat-square&logo=python&logoColor=white)](#) [![Streamlit](https://img.shields.io/badge/Streamlit-1.40+-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)](#) [![OpenCV](https://img.shields.io/badge/OpenCV-4.8+-5C3EE8?style=flat-square&logo=opencv&logoColor=white)](#) [![MediaPipe](https://img.shields.io/badge/MediaPipe-Tasks%20Vision-0078D4?style=flat-square&logo=google&logoColor=white)](#) [![WebAssembly](https://img.shields.io/badge/WebAssembly-WASM-654FF0?style=flat-square&logo=webassembly&logoColor=white)](#) [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](#)
+
+<p align="center">
+  A high-performance, real-time gesture-controlled drawing canvas powered by MediaPipe Hand Landmarker, OpenCV, and WebAssembly with Apple-inspired Liquid Glass UI and bi-directional hardware acceleration.
+</p>
+
+</div>
+
+---
 
 **Live Demo**: [https://aircanvasbyjsh.streamlit.app/](https://aircanvasbyjsh.streamlit.app/)
 
-> **Developer Recommendation**: For the best, smoothest, and lowest-latency drawing experience, run on a PC in **dGPU mode** (Discrete GPU).
+---
+
+## Highlights
+
+- **Apple-Inspired Liquid Glass UI**: Frosted translucent glassmorphism interface with backdrop saturation blur, floating pill controls, specular inner borders, and high-contrast dark canvas.
+- **Bi-Directional Auto Hardware Stepping**: Dynamic hardware orchestration strictly prioritizing Discrete GPU (`dGPU`) -> Integrated GPU (`iGPU`) -> CPU WASM fallback, with real-time frame-pacing resolution scaling.
+- **Dynamic Fullscreen Mode**: Seamless cross-context fullscreen synchronization across native browsers and iframe embeds.
+- **Client-Side Privacy**: 100% of video processing, hand landmark estimation, and vector ink rendering occurs inside your browser. Zero video bytes streamed over the network.
+
+> **Developer Recommendation**: For the best, lowest-latency drawing experience, run on a PC in **dGPU mode** (Discrete GPU).
 
 ---
 
-## What's New in v1.4
+## Gesture Controls
 
-- **Liquid Glass Interface**: Apple-inspired translucent glassmorphism aesthetic with background saturation blur, floating pill controls, specular borders, and refined dark theme.
-- **Bi-Directional Auto Hardware Stepping**: Dynamic hardware orchestration prioritizing discrete GPU (`dGPU`) $\to$ integrated GPU (`iGPU`) $\to$ CPU WASM fallback with real-time bidirectional recovery and automatic resolution downscaling/upscaling based on frame pacing.
-- **Dynamic Fullscreen Mode**: Seamless cross-context fullscreen toggle that automatically syncs UI text and states across native and embedded iframe viewports.
-
----
-
-## Features
-
-- **Dual-Interface Runtime**:
-  - **Web Application (`app.py`)**: Runs in modern web browsers via Streamlit. Performs 100% of video processing, MediaPipe landmark detection, and vector rendering locally in-browser via WebAssembly and WebGL. Zero video bytes streamed over the network.
-  - **Native Desktop Application (`air_canvas.py`)**: Hardware-accelerated Python OpenCV + MediaPipe standalone desktop runtime.
-- **Hardware Acceleration Hierarchy**:
-  - Automatically routes execution: **dGPU** (Discrete GPU) $\to$ **iGPU** (Integrated GPU) $\to$ **CPU** (WASM SIMD Multi-Core).
-  - Minimal HUD displays active hardware and runtime telemetry.
-  - Manual runtime override available via dropdown.
-- **Rock-Solid 30 FPS Frame Pacing**:
-  - Precision delta-accumulator loop eliminates micro-stutters and frame drops.
-  - Dynamic load-adaptive inference resolution scaling automatically stabilizes frame rates.
-  - Motion-optimized confidence thresholds maintain tracking lock during rapid sweeps.
-- **Air Gestures**:
-  - **Index Finger Alone**: Draw freehand vector strokes with Bézier smoothing.
-  - **Pinch (Index + Thumb)**: Select and translate existing strokes across canvas without distortion.
-  - **Closed Fist**: Eraser with dedicated adjustable radius.
-  - **Index + Middle**: Hover cursor reticle.
-- **Studio Canvas Tools**:
-  - 6-swatch primary palette + native RGB color picker.
-  - Brush thickness slider (1–24 px).
-  - Dedicated eraser slider (15–80 px).
-  - Dynamic fullscreen toggle, Undo, Redo, and Clear.
-  - Dynamic multi-camera selector.
+- **Index Finger**: Freehand vector drawing with Bezier smoothing.
+- **Pinch (Index + Thumb)**: Select and move existing strokes across canvas.
+- **Closed Fist**: Dynamic eraser with adjustable radius.
+- **Index + Middle**: Hover reticle guide.
 
 ---
 
-## Installation & Requirements
+## Quick Start
 
-Ensure Python 3.9+ is installed:
+### 1. Web Application (Recommended)
 
 ```bash
 pip install -r requirements.txt
-```
-
----
-
-## Running the Application
-
-### 1. Web Application (Recommended / Streamlit Cloud Ready)
-
-```bash
 streamlit run app.py
 ```
-
-Opens an in-browser interface with full local WebGL/WASM acceleration, optimized for lightweight cloud containers and local laptops.
 
 ### 2. Standalone Desktop Application
 
@@ -69,14 +51,14 @@ Opens an in-browser interface with full local WebGL/WASM acceleration, optimized
 python air_canvas.py
 ```
 
-Runs the OpenCV desktop window with terminal camera and hardware backend selection wizard.
+### 3. Automated Tests
+
+```bash
+pytest -v
+```
 
 ---
 
-## Testing
+## License
 
-Run the test suite:
-
-```bash
-pytest
-```
+MIT License

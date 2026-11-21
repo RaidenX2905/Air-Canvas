@@ -2,6 +2,8 @@
 
 A high-performance, real-time gesture-controlled drawing canvas powered by MediaPipe Hand Landmarker, WebAssembly, and OpenCV.
 
+**Live Demo**: [https://aircanvasbyjsh.streamlit.app/](https://aircanvasbyjsh.streamlit.app/)
+
 ---
 
 ## Features

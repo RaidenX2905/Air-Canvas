@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="brushGradTrans" x1="15%" y1="90%" x2="85%" y2="10%">
+      <stop offset="0%" stop-color="#A78BFA" />
+      <stop offset="45%" stop-color="#66E7FF" />
+      <stop offset="100%" stop-color="#F5F7FF" />
+    </linearGradient>
+    <linearGradient id="crossGradTrans" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#A78BFA" />
+      <stop offset="100%" stop-color="#66E7FF" />
+    </linearGradient>
+  </defs>
+
+  <g>
+    <path 
+      d="M 124 396
+         C 148 290 204 140 256 108
+         C 308 140 364 290 388 396" 
+      fill="none" 
+      stroke="url(#brushGradTrans)" 
+      stroke-width="54" 
+      stroke-linecap="round" 
+      stroke-linejoin="round" />
+
+    <path 
+      d="M 180 292
+         C 230 274 282 274 332 292" 
+      fill="none" 
+      stroke="url(#crossGradTrans)" 
+      stroke-width="48" 
+      stroke-linecap="round" />
+
+    <circle cx="256" cy="108" r="16" fill="#66E7FF" />
+  </g>
+</svg>

@@ -16,7 +16,22 @@
     <!-- Top Bar Controls -->
     <header class="top-nav">
       <div class="brand">
-        <img src="brand-mark.svg" alt="Air Canvas Mark" class="logo-mark-svg" width="22" height="22" style="filter: drop-shadow(0 0 6px rgba(102, 231, 255, 0.6));" />
+        <svg class="logo-mark" width="22" height="22" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle; margin-right:8px; filter: drop-shadow(0 0 6px rgba(102, 231, 255, 0.45));">
+  <defs>
+    <linearGradient id="nb-stroke" x1="64" y1="448" x2="448" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#A78BFA" />
+      <stop offset="50%" stop-color="#66E7FF" />
+      <stop offset="100%" stop-color="#F5F7FF" />
+    </linearGradient>
+    <filter id="nb-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <path d="M 120 420 C 130 380, 210 140, 256 90 C 275 140, 320 280, 392 420" stroke="url(#nb-stroke)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 180 300 Q 256 265 345 305" stroke="url(#nb-stroke)" stroke-width="36" stroke-linecap="round" />
+  <circle cx="256" cy="90" r="14" fill="#FFFFFF" filter="url(#nb-glow)" />
+</svg>
         <span class="brand-title">AIR CANVAS</span>
         <span class="hw-chip active" id="hwChipActive">
           <span class="badge" id="hwBadge">PROBING...</span>

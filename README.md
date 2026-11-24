@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="static/brand-mark-dark-512.png" alt="Air Canvas Brand Mark" width="128" height="128">
+  <img src="static/air-canvas-brand-512.png" alt="Air Canvas Brand Mark" width="128" height="128">
 </p>
 
 <div align="center">

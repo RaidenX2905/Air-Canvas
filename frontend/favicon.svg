@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="brushGrad" x1="15%" y1="90%" x2="85%" y2="10%">
+      <stop offset="0%" stop-color="#A78BFA" />
+      <stop offset="40%" stop-color="#66E7FF" />
+      <stop offset="100%" stop-color="#F5F7FF" />
+    </linearGradient>
+    <linearGradient id="crossGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#A78BFA" />
+      <stop offset="100%" stop-color="#66E7FF" />
+    </linearGradient>
+    <filter id="spatialGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#66E7FF" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- Deep Charcoal Canvas -->
+  <rect width="512" height="512" rx="112" fill="#101116" />
+  <rect width="508" height="508" x="2" y="2" rx="110" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2" />
+
+  <g filter="url(#spatialGlow)">
+    <!-- The "A" Silhouette Continuous Fluid Ribbon -->
+    <!-- Left upward sweeping arc looping over apex into right anchor -->
+    <path 
+      d="M 124 396
+         C 148 290 204 140 256 108
+         C 308 140 364 290 388 396" 
+      fill="none" 
+      stroke="url(#brushGrad)" 
+      stroke-width="50" 
+      stroke-linecap="round" 
+      stroke-linejoin="round" />
+
+    <!-- Spatial Crossbar / Freehand Horizontal Vector -->
+    <path 
+      d="M 180 292
+         C 230 274 282 274 332 292" 
+      fill="none" 
+      stroke="url(#crossGrad)" 
+      stroke-width="44" 
+      stroke-linecap="round" />
+
+    <!-- Luminous Touchless Focal Node at Apex -->
+    <circle cx="256" cy="108" r="14" fill="#FFFFFF" />
+  </g>
+</svg>
